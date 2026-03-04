@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L'AUBE 晨曦 | 頂級私密輕食咖啡</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Noto+Serif+TC:wght@300;400;500;600&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    
+    <!-- CDNs -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        vintage: {
+                            cream: '#F5F0E8',
+                            paper: '#EBE3D5',
+                            burgundy: '#5C1A1B',
+                            charcoal: '#2C2C2C',
+                            gold: '#B8905B',
+                            linen: '#D8CBB6'
+                        }
+                    },
+                    fontFamily: {
+                        serif:['"Cormorant Garamond"', '"Noto Serif TC"', 'serif'],
+                        sans:['"Lato"', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'vintage': '10px 10px 30px rgba(92, 26, 27, 0.05)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Base Styles & Typography */
+        body {
+            background-color: #F5F0E8;
+            color: #2C2C2C;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        h1, h2, h3, h4, h5, .font-serif {
+            font-family: 'Cormorant Garamond', 'Noto Serif TC', serif;
+        }
+
+        p, a, span, .font-sans {
+            font-family: 'Lato', sans-serif;
+        }
+
+        /* Film Grain Noise Overlay */
+        .noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.08;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            mix-blend-mode: multiply;
+        }
+
+        /* Paper Texture Base */
+        .paper-texture {
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='a'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.05' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23a)' opacity='0.03'/%3E%3C/svg%3E");
+        }
+
+        /* Vintage Image Filter */
+        .img-vintage {
+            filter: sepia(0.3) contrast(1.05) brightness(0.95);
+            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .img-container:hover .img-vintage {
+            filter: sepia(0) contrast(1.1) brightness(1.05);
+            transform: scale(1.03);
+        }
+
+        /* Glassmorphism Vintage Cards */
+        .glass-vintage {
+            background: rgba(245, 240, 232, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(184, 144, 91, 0.2);
+            box-shadow: 0 20px 40px rgba(92, 26, 27, 0.03), inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+            transition: transform 0.4s ease, border-color 0.4s ease;
+        }
+
+        .glass-vintage:hover {
+            border-color: rgba(184, 144, 91, 0.6);
+            transform: translateY(-5px);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #F5F0E8;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #D8CBB6;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #B8905B;
+        }
+
+        /* Asymmetric Typography Utilities */
+        .text-vertical {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+        }
+
+        /* CTA Button */
+        .btn-vintage {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem 2.5rem;
+            color: #F5F0E8;
+            background-color: #5C1A1B;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.125rem;
+            letter-spacing: 0.1em;
+            overflow: hidden;
+            transition: color 0.4s ease;
+            border: 1px solid #5C1A1B;
+        }
+
+        .btn-vintage::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #F5F0E8;
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.4s cubic-bezier(0.86, 0, 0.07, 1);
+            z-index: 1;
+        }
+
+        .btn-vintage:hover::before {
+            transform: scaleX(1);
+            transform-origin: left;
+        }
+
+        .btn-vintage:hover {
+            color: #5C1A1B;
+        }
+
+        .btn-vintage span, .btn-vintage iconify-icon {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* SVG Decorative Path */
+        #deco-path {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+        }
+
+        /* Gradient mask for Hero text readability */
+        .hero-text-mask {
+            background: linear-gradient(90deg, #F5F0E8 0%, rgba(245, 240, 232, 0.8) 50%, rgba(245, 240, 232, 0) 100%);
+        }
+    </style>
+</head>
+<body class="antialiased paper-texture">
+
+    <!-- Global Noise -->
+    <div class="noise-overlay"></div>
+
+    <!-- 3D Dust Particles Container -->
+    <div id="canvas-container" class="fixed inset-0 z-0 pointer-events-none opacity-50"></div>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full top-0 z-50 transition-all duration-500 py-6 px-6 md:px-12" id="navbar">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <a href="#" class="text-2xl md:text-3xl font-serif text-vintage-burgundy font-bold tracking-widest flex flex-col items-center">
+                L'AUBE
+                <span class="text-[10px] tracking-[0.4em] font-sans text-vintage-gold mt-1 uppercase">Matin Privé</span>
+            </a>
+            
+            <div class="hidden md:flex items-center space-x-10">
+                <a href="#story" class="text-vintage-charcoal hover:text-vintage-burgundy font-serif tracking-widest text-sm transition-colors duration-300">品牌故事</a>
+                <a href="#experience" class="text-vintage-charcoal hover:text-vintage-burgundy font-serif tracking-widest text-sm transition-colors duration-300">隱密空間</a>
+                <a href="#menu" class="text-vintage-charcoal hover:text-vintage-burgundy font-serif tracking-widest text-sm transition-colors duration-300">極致選品</a>
+            </div>
+
+            <div class="hidden md:block">
+                <a href="#book" class="text-vintage-burgundy border-b border-vintage-burgundy pb-1 font-serif tracking-widest text-sm hover:text-vintage-gold hover:border-vintage-gold transition-all duration-300">
+                    立即預訂
+                </a>
+            </div>
+
+            <!-- Mobile menu icon -->
+            <button class="md:hidden text-vintage-burgundy text-2xl">
+                <iconify-icon icon="ph:list-light"></iconify-icon>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative min-h-screen flex items-center pt-24 overflow-hidden z-10">
+        <!-- Abstract SVG Decoration behind text -->
+        <svg class="absolute top-20 left-[-10%] w-[50%] h-auto text-vintage-linen/40 pointer-events-none" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <path id="deco-path" fill="none" stroke="currentColor" stroke-width="0.5" d="M10,100 C40,10 160,10 190,100 C160,190 40,190 10,100 Z" />
+        </svg>
+
+        <div class="max-w-7xl mx-auto px-6 md:px-12 w-full">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                
+                <!-- Text Content (Asymmetric Left) -->
+                <div class="lg:col-span-5 relative z-20 hero-text-mask p-8 lg:p-0 rounded-r-3xl lg:rounded-none">
+                    <div class="flex items-center space-x-4 mb-6 gs-reveal">
+                        <span class="w-12 h-[1px] bg-vintage-gold"></span>
+                        <span class="font-sans text-xs tracking-[0.3em] text-vintage-gold uppercase">Breakfast & Light Meal</span>
+                    </div>
+                    
+                    <h1 class="text-5xl md:text-7xl font-serif text-vintage-burgundy leading-[1.1] mb-6 tracking-wide gs-reveal">
+                        晨光微醺<br>
+                        <span class="italic text-vintage-charcoal text-4xl md:text-6xl font-light mt-2 block">品味隱世靜謐</span>
+                    </h1>
+                    
+                    <p class="text-vintage-charcoal/80 font-sans text-sm md:text-base leading-relaxed mb-10 max-w-md tracking-wider font-light gs-reveal">
+                        隱身於喧囂城市中的私人雅座。我們捨棄繁雜，專注於為您獻上一杯溫潤手沖與頂級輕食，在絕對私密的空間裡，開啟尊榮的一天。
+                    </p>
+
+                    <div class="gs-reveal">
+                        <a href="#book" class="btn-vintage">
+                            <span>立即預訂</span>
+                            <iconify-icon icon="ph:arrow-right-light" class="ml-3 text-xl"></iconify-icon>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Image Content (Asymmetric Right) -->
+                <div class="lg:col-span-7 relative h-[60vh] lg:h-[85vh] w-full img-container gs-reveal-img ml-auto lg:-mr-12">
+                    <div class="absolute inset-0 bg-vintage-burgundy/5 z-10 mix-blend-multiply pointer-events-none"></div>
+                    <img src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1920&q=80" alt="Vintage Cafe Interior" class="w-full h-full object-cover img-vintage rounded-sm shadow-vintage">
+                    
+                    <!-- Floating Badge -->
+                    <div class="absolute bottom-10 -left-10 lg:-left-20 bg-vintage-cream p-6 border border-vintage-linen shadow-xl z-20 hidden md:block gs-reveal">
+                        <p class="font-serif italic text-vintage-burgundy text-xl border-b border-vintage-linen pb-3 mb-3">Reservation Only</p>
+                        <div class="flex items-center space-x-2 text-vintage-charcoal text-xs font-sans tracking-widest uppercase">
+                            <iconify-icon icon="ph:key-light" class="text-lg"></iconify-icon>
+                            <span>Exclusive Access</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Scroll Indicator -->
+        <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center gs-reveal">
+            <span class="text-vertical font-serif tracking-[0.3em] text-xs text-vintage-charcoal mb-4">SCROLL</span>
+            <div class="w-[1px] h-12 bg-vintage-linen relative overflow-hidden">
+                <div class="w-full h-full bg-vintage-burgundy absolute top-0 left-0 -translate-y-full scroll-line"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Value Proposition Section -->
+    <section id="story" class="py-32 relative z-10">
+        <div class="max-w-7xl mx-auto px-6 md:px-12">
+            
+            <div class="text-center mb-24 max-w-2xl mx-auto gs-fade-up">
+                <iconify-icon icon="ph:coffee-light" class="text-4xl text-vintage-gold mb-6"></iconify-icon>
+                <h2 class="text-3xl md:text-5xl font-serif text-vintage-burgundy mb-6">不只是早午餐，<br>是一場藝術體驗。</h2>
+                <p class="font-sans text-vintage-charcoal/70 tracking-widest leading-loose text-sm">
+                    每一個細節皆有故事，每一口風味皆是斟酌。我們為追求極致的少數人，打造專屬的晨間儀式。
+                </p>
+            </div>
+
+            <!-- Asymmetric Grid for Values -->
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-8 items-start">
+                
+                <!-- Card 1: 尊榮至上 -->
+                <div class="md:col-span-4 md:mt-24 gs-fade-up">
+                    <div class="glass-vintage p-8 h-full flex flex-col relative overflow-hidden group img-container">
+                        <div class="h-64 -mx-8 -mt-8 mb-8 overflow-hidden relative border-b border-vintage-linen">
+                            <img src="https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&fit=crop&w=800&q=80" alt="尊榮至上" class="w-full h-full object-cover img-vintage">
+                        </div>
+                        <div class="relative z-10">
+                            <span class="text-vintage-gold font-serif text-4xl absolute -top-8 opacity-20 group-hover:opacity-100 transition-opacity">01</span>
+                            <h3 class="text-2xl font-serif text-vintage-burgundy mb-4 tracking-wider">尊榮至上</h3>
+                            <p class="font-sans text-sm text-vintage-charcoal/80 leading-relaxed font-light">
+                                專屬管家式桌邊服務，從落座的熱毛巾到精準掌控溫度的手沖咖啡，將頂級飯店的款待哲學融入您的早晨。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2: 極致品味 -->
+                <div class="md:col-span-4 gs-fade-up">
+                    <div class="glass-vintage p-8 h-full flex flex-col relative overflow-hidden group img-container">
+                        <div class="h-80 -mx-8 -mt-8 mb-8 overflow-hidden relative border-b border-vintage-linen">
+                            <img src="https://images.unsplash.com/photo-1493770348161-369560ae357d?auto=format&fit=crop&w=800&q=80" alt="極致品味" class="w-full h-full object-cover img-vintage">
+                        </div>
+                        <div class="relative z-10">
+                            <span class="text-vintage-gold font-serif text-4xl absolute -top-8 opacity-20 group-hover:opacity-100 transition-opacity">02</span>
+                            <h3 class="text-2xl font-serif text-vintage-burgundy mb-4 tracking-wider">極致品味</h3>
+                            <p class="font-sans text-sm text-vintage-charcoal/80 leading-relaxed font-light">
+                                嚴選在地契作農場食材與世界級莊園咖啡豆。以法式料理手法演繹輕食早午餐，讓味蕾在優雅中甦醒。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3: 絕對私密 (Image Updated Here) -->
+                <div class="md:col-span-4 md:mt-48 gs-fade-up">
+                    <div class="glass-vintage p-8 h-full flex flex-col relative overflow-hidden group img-container">
+                        <div class="h-56 -mx-8 -mt-8 mb-8 overflow-hidden relative border-b border-vintage-linen">
+                            <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80" alt="絕對私密" class="w-full h-full object-cover img-vintage">
+                        </div>
+                        <div class="relative z-10">
+                            <span class="text-vintage-gold font-serif text-4xl absolute -top-8 opacity-20 group-hover:opacity-100 transition-opacity">03</span>
+                            <h3 class="text-2xl font-serif text-vintage-burgundy mb-4 tracking-wider">絕對私密</h3>
+                            <p class="font-sans text-sm text-vintage-charcoal/80 leading-relaxed font-light">
+                                每日僅接待限定席次，包廂式座位設計結合復古布幔與柔和光影，為您阻絕外界紛擾，保留純粹的對話空間。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Parallax Image Divider -->
+    <section class="h-[50vh] relative overflow-hidden z-10">
+        <div class="absolute inset-0 bg-vintage-burgundy/20 z-10 mix-blend-multiply"></div>
+        <img src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=1920&q=80" alt="Coffee preparation" class="w-full h-full object-cover parallax-bg filter sepia-[0.4] brightness-90">
+        <div class="absolute inset-0 z-20 flex items-center justify-center text-center">
+            <h2 class="text-4xl md:text-6xl font-serif italic text-vintage-cream tracking-widest drop-shadow-lg">"Savor the Silence"</h2>
+        </div>
+    </section>
+
+    <!-- Final CTA Section -->
+    <section id="book" class="py-32 relative z-10 bg-vintage-paper border-t border-vintage-linen">
+        <!-- Decor corner -->
+        <svg class="absolute top-0 right-0 w-32 h-32 text-vintage-gold/20 pointer-events-none transform rotate-90" viewBox="0 0 100 100" fill="currentColor">
+            <path d="M0 0 L100 0 L100 100 Q100 0 0 0 Z"/>
+        </svg>
+
+        <div class="max-w-4xl mx-auto px-6 text-center gs-fade-up">
+            <p class="font-sans text-xs tracking-[0.4em] text-vintage-gold uppercase mb-6">Reservation</p>
+            <h2 class="text-4xl md:text-5xl font-serif text-vintage-burgundy mb-8 tracking-wider">保留您的專屬席次</h2>
+            <div class="w-24 h-[1px] bg-vintage-gold/50 mx-auto mb-10"></div>
+            <p class="font-sans text-vintage-charcoal/80 leading-relaxed tracking-widest text-sm mb-12 max-w-xl mx-auto font-light">
+                為了確保每位賓客享有「絕對私密」與「尊榮至上」的服務，L'AUBE 採全預約制。<br>請提前為自己安排一場晨間的極致饗宴。
+            </p>
+            
+            <button class="btn-vintage shadow-vintage">
+                <span>立即預訂</span>
+            </button>
+            
+            <p class="mt-8 text-xs font-sans text-vintage-charcoal/50 italic tracking-widest">席次有限，敬請提早預約</p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-vintage-burgundy text-vintage-cream py-16 border-t border-vintage-charcoal/20 relative z-10">
+        <div class="noise-overlay" style="opacity: 0.05;"></div>
+        <div class="max-w-7xl mx-auto px-6 md:px-12 grid grid-cols-1 md:grid-cols-3 gap-12 text-center md:text-left">
+            
+            <div class="flex flex-col items-center md:items-start">
+                <a href="#" class="text-3xl font-serif text-vintage-cream font-bold tracking-widest mb-2">
+                    L'AUBE
+                </a>
+                <p class="font-sans text-xs tracking-[0.3em] text-vintage-gold uppercase mb-6">Matin Privé</p>
+                <p class="font-sans text-xs text-vintage-cream/60 leading-relaxed font-light tracking-widest">
+                    隱世。品味。尊榮。<br>您的專屬私密咖啡館。
+                </p>
+            </div>
+
+            <div class="flex flex-col items-center md:items-start">
+                <h4 class="font-serif text-xl mb-6 text-vintage-gold">Visit Us</h4>
+                <p class="font-sans text-xs text-vintage-cream/80 leading-loose tracking-widest font-light">
+                    隱市巷弄 19 號, 舊城區<br>
+                    Tue - Sun | 08:00 - 15:00<br>
+                    (By Appointment Only)
+                </p>
+            </div>
+
+            <div class="flex flex-col items-center md:items-start">
+                <h4 class="font-serif text-xl mb-6 text-vintage-gold">Connect</h4>
+                <div class="flex space-x-6 mb-6">
+                    <a href="#" class="text-vintage-cream/80 hover:text-vintage-gold transition-colors"><iconify-icon icon="ph:instagram-logo-light" class="text-2xl"></iconify-icon></a>
+                    <a href="#" class="text-vintage-cream/80 hover:text-vintage-gold transition-colors"><iconify-icon icon="ph:facebook-logo-light" class="text-2xl"></iconify-icon></a>
+                </div>
+                <a href="mailto:reserve@laube.com" class="font-sans text-xs text-vintage-cream/80 hover:text-vintage-gold transition-colors tracking-widest font-light">reserve@laube.com</a>
+            </div>
+
+        </div>
+        
+        <div class="max-w-7xl mx-auto px-6 md:px-12 mt-16 pt-8 border-t border-vintage-cream/10 text-center md:text-left flex flex-col md:flex-row justify-between items-center">
+            <p class="font-sans text-[10px] text-vintage-cream/40 tracking-[0.2em] uppercase">&copy; 2026 L'AUBE. All rights reserved.</p>
+            <div class="flex space-x-4 mt-4 md:mt-0 font-sans text-[10px] text-vintage-cream/40 tracking-[0.2em] uppercase">
+                <a href="#" class="hover:text-vintage-cream">Privacy</a>
+                <a href="#" class="hover:text-vintage-cream">Terms</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            
+            // --- 1. Navbar Scroll Effect ---
+            const navbar = document.getElementById('navbar');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('bg-vintage-cream/95', 'backdrop-blur-md', 'shadow-sm');
+                    navbar.classList.remove('py-6');
+                    navbar.classList.add('py-4');
+                } else {
+                    navbar.classList.remove('bg-vintage-cream/95', 'backdrop-blur-md', 'shadow-sm');
+                    navbar.classList.add('py-6');
+                    navbar.classList.remove('py-4');
+                }
+            });
+
+            // --- 2. GSAP Animations (Vintage Smooth Reavels) ---
+            gsap.registerPlugin(ScrollTrigger);
+
+            // Hero Elements Reveal
+            gsap.from(".gs-reveal", {
+                y: 40,
+                opacity: 0,
+                duration: 1.5,
+                stagger: 0.2,
+                ease: "power3.out",
+                delay: 0.2
+            });
+
+            gsap.from(".gs-reveal-img", {
+                x: 50,
+                opacity: 0,
+                duration: 2,
+                ease: "power2.out",
+                delay: 0.5
+            });
+
+            // Fade up elements on scroll
+            gsap.utils.toArray('.gs-fade-up').forEach(element => {
+                gsap.from(element, {
+                    scrollTrigger: {
+                        trigger: element,
+                        start: "top 85%",
+                    },
+                    y: 50,
+                    opacity: 0,
+                    duration: 1.2,
+                    ease: "power2.out"
+                });
+            });
+
+            // Parallax Background
+            gsap.to(".parallax-bg", {
+                yPercent: 30,
+                ease: "none",
+                scrollTrigger: {
+                    trigger: ".parallax-bg",
+                    start: "top bottom", 
+                    end: "bottom top",
+                    scrub: true
+                } 
+            });
+
+            // --- 3. Anime.js SVG Path Drawing ---
+            anime({
+                targets: '#deco-path',
+                strokeDashoffset:[anime.setDashoffset, 0],
+                easing: 'easeInOutSine',
+                duration: 4000,
+                direction: 'alternate',
+                loop: true
+            });
+
+            // Scroll Line Loop
+            anime({
+                targets: '.scroll-line',
+                translateY:['-100%', '100%'],
+                duration: 2500,
+                easing: 'easeInOutSine',
+                loop: true
+            });
+
+            // --- 4. Three.js Subtle Ambient Dust Particles (Vintage feel) ---
+            const initThreeJS = () => {
+                const container = document.getElementById('canvas-container');
+                const scene = new THREE.Scene();
+                const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+                
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                container.appendChild(renderer.domElement);
+
+                // Create particles
+                const particleCount = 150;
+                const geometry = new THREE.BufferGeometry();
+                const positions = new Float32Array(particleCount * 3);
+
+                for(let i = 0; i < particleCount * 3; i++) {
+                    positions[i] = (Math.random() - 0.5) * 15;
+                }
+
+                geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+                
+                // Vintage dust color (warm gold/brown)
+                const material = new THREE.PointsMaterial({
+                    size: 0.02,
+                    color: 0xB8905B,
+                    transparent: true,
+                    opacity: 0.3,
+                    blending: THREE.NormalBlending
+                });
+
+                const particles = new THREE.Points(geometry, material);
+                scene.add(particles);
+                camera.position.z = 4;
+
+                // Mouse interaction setup
+                let mouseX = 0;
+                let mouseY = 0;
+                let targetX = 0;
+                let targetY = 0;
+                const windowHalfX = window.innerWidth / 2;
+                const windowHalfY = window.innerHeight / 2;
+
+                document.addEventListener('mousemove', (event) => {
+                    mouseX = (event.clientX - windowHalfX) * 0.0002;
+                    mouseY = (event.clientY - windowHalfY) * 0.0002;
+                });
+
+                // Animation loop
+                const animate = () => {
+                    requestAnimationFrame(animate);
+                    
+                    targetX = mouseX * 0.5;
+                    targetY = mouseY * 0.5;
+                    
+                    // Slow rotation for dust feel
+                    particles.rotation.y += 0.0005;
+                    particles.rotation.x += 0.0002;
+
+                    // Subtle mouse influence
+                    particles.rotation.y += 0.05 * (targetX - particles.rotation.y);
+                    particles.rotation.x += 0.05 * (targetY - particles.rotation.x);
+
+                    // Drift downwards slightly
+                    const positions = particles.geometry.attributes.position.array;
+                    for(let i = 1; i < particleCount * 3; i += 3) {
+                        positions[i] -= 0.001;
+                        if(positions[i] < -7.5) {
+                            positions[i] = 7.5;
+                        }
+                    }
+                    particles.geometry.attributes.position.needsUpdate = true;
+
+                    renderer.render(scene, camera);
+                };
+                
+                animate();
+
+                // Window resize handler
+                window.addEventListener('resize', () => {
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                });
+            };
+
+            // Initialize Three.js gracefully
+            try {
+                initThreeJS();
+            } catch (e) {
+                console.log("Three.js not supported or loaded.");
+            }
+        });
+    </script>
+</body>
+</html>

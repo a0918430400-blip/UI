@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AURA | 頂級晨間輕食預約平台</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- CDNs -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        background: '#F8FAFC',
+                        brand: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            300: '#6ee7b7',
+                            500: '#10b981', /* Primary Emerald */
+                            600: '#059669',
+                            900: '#064e3b',
+                        },
+                        surface: {
+                            light: '#ffffff',
+                            muted: '#f1f5f9',
+                            dark: '#0f172a'
+                        }
+                    },
+                    fontFamily: {
+                        sans:['"Plus Jakarta Sans"', '"Noto Sans TC"', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'soft': '0 20px 40px -15px rgba(0,0,0,0.05)',
+                        'glow': '0 0 20px rgba(16, 185, 129, 0.3)',
+                        'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.07)'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Base Reset & Typography */
+        body {
+            background-color: #F8FAFC;
+            color: #0f172a;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* SaaS Style Hero Gradient Mask */
+        .hero-img-mask {
+            -webkit-mask-image: linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,1) 30%, rgba(0,0,0,1) 100%);
+            mask-image: linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,1) 30%, rgba(0,0,0,1) 100%);
+        }
+
+        @media (max-width: 1024px) {
+            .hero-img-mask {
+                -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,0) 0%, rgba(0,0,0,1) 40%, rgba(0,0,0,1) 100%);
+                mask-image: linear-gradient(to top, rgba(0,0,0,0) 0%, rgba(0,0,0,1) 40%, rgba(0,0,0,1) 100%);
+            }
+        }
+
+        /* Glassmorphism Cards */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 8px 32px 0 rgba(15, 23, 42, 0.04), inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+            transform-style: preserve-3d;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .glass-card:hover {
+            border-color: rgba(16, 185, 129, 0.3);
+            box-shadow: 0 12px 40px 0 rgba(16, 185, 129, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.8);
+        }
+
+        /* 3D Content inside Cards */
+        .card-content-3d {
+            transform: translateZ(30px);
+        }
+
+        /* Abstract Floating Shapes */
+        .floating-blob {
+            position: absolute;
+            z-index: 0;
+            pointer-events: none;
+            filter: blur(60px);
+            opacity: 0.6;
+        }
+
+        /* Gradient Text */
+        .text-gradient {
+            background: linear-gradient(135deg, #059669 0%, #34d399 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Interactive SaaS Button */
+        .btn-saas {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1;
+        }
+        
+        .btn-saas::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+            z-index: -1;
+        }
+
+        .btn-saas:hover::before {
+            left: 100%;
+        }
+
+        .btn-saas:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.4);
+        }
+
+        /* Custom Selection */
+        ::selection {
+            background: rgba(16, 185, 129, 0.2);
+            color: #064e3b;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Three.js Background (Micro-particles) -->
+    <div id="canvas-container" class="fixed inset-0 z-[0] pointer-events-none opacity-50 mix-blend-multiply"></div>
+
+    <!-- Soft Glow Blobs (Anime.js targets) -->
+    <div class="floating-blob w-[40vw] h-[40vw] rounded-full bg-brand-100 top-[-10%] left-[-10%]"></div>
+    <div class="floating-blob w-[30vw] h-[30vw] rounded-full bg-blue-50 bottom-[10%] right-[-5%]"></div>
+    <div class="floating-blob w-[25vw] h-[25vw] rounded-full bg-emerald-50 top-[40%] left-[30%]"></div>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full top-0 z-50 transition-all duration-300 border-b border-transparent" id="navbar">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center gap-2 cursor-pointer group">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center text-white shadow-glow group-hover:shadow-lg transition-all duration-300">
+                        <iconify-icon icon="ph:leaf-bold" class="text-xl"></iconify-icon>
+                    </div>
+                    <span class="font-bold text-2xl tracking-tight text-surface-dark">AURA <span class="font-normal text-slate-400 text-sm ml-1 hidden sm:inline-block">晨光私域</span></span>
+                </div>
+                
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#features" class="text-slate-500 hover:text-brand-600 font-semibold transition-colors text-sm tracking-wide">核心體驗</a>
+                    <a href="#space" class="text-slate-500 hover:text-brand-600 font-semibold transition-colors text-sm tracking-wide">私密空間</a>
+                    <a href="#menu" class="text-slate-500 hover:text-brand-600 font-semibold transition-colors text-sm tracking-wide">極致選品</a>
+                </div>
+
+                <!-- CTA -->
+                <div class="hidden md:block">
+                    <a href="#book" class="btn-saas inline-flex items-center justify-center px-6 py-2.5 rounded-full text-sm font-bold text-white bg-surface-dark hover:bg-slate-800 shadow-md">
+                        立即預訂
+                        <iconify-icon icon="ph:arrow-right-bold" class="ml-2"></iconify-icon>
+                    </a>
+                </div>
+
+                <!-- Mobile menu button -->
+                <div class="md:hidden flex items-center">
+                    <button class="text-slate-600 hover:text-brand-600 transition-colors">
+                        <iconify-icon icon="ph:list-bold" class="text-2xl"></iconify-icon>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative min-h-screen pt-24 pb-12 lg:pt-0 lg:pb-0 flex items-center overflow-hidden z-10">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8 w-full relative">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center h-full min-h-[80vh]">
+                
+                <!-- Text Content (Left) -->
+                <div class="relative z-20 flex flex-col justify-center order-2 lg:order-1 gs-reveal">
+                    
+                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/60 backdrop-blur-md border border-slate-200/50 shadow-sm mb-6 w-max">
+                        <span class="relative flex h-2 w-2">
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-2 w-2 bg-brand-500"></span>
+                        </span>
+                        <span class="text-xs font-bold text-slate-600 tracking-wider uppercase">Invite-Only Morning Oasis</span>
+                    </div>
+
+                    <h1 class="text-5xl lg:text-7xl font-extrabold text-surface-dark tracking-tight leading-[1.15] mb-6">
+                        重塑您的<br>
+                        <span class="text-gradient">晨間儀式</span>
+                    </h1>
+
+                    <p class="text-lg text-slate-500 font-medium max-w-lg leading-relaxed mb-10">
+                        專為追求極致的您，打造雲端預約制的頂級輕食咖啡體驗。在這裡，時間慢了下來，品味被無限放大。
+                    </p>
+
+                    <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                        <a href="#book" class="btn-saas w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 text-base font-bold rounded-full text-white bg-brand-500 shadow-glow">
+                            開啟專屬時光
+                            <iconify-icon icon="ph:arrow-right-bold" class="ml-2 text-lg"></iconify-icon>
+                        </a>
+                        <div class="flex items-center gap-3 text-sm font-semibold text-slate-500 px-4 py-3">
+                            <iconify-icon icon="ph:shield-check-duotone" class="text-brand-500 text-xl"></iconify-icon>
+                            <span>絕對私密・預約制</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hero Image (Right) -->
+                <div class="absolute inset-0 lg:relative lg:inset-auto order-1 lg:order-2 h-[50vh] lg:h-[90vh] w-full lg:w-[120%] lg:-mr-[20%] gs-reveal-img z-10 lg:z-0 opacity-20 lg:opacity-100">
+                    <div class="w-full h-full hero-img-mask">
+                        <img src="https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=1920&q=80" alt="Modern Minimalist Cafe Setup" class="w-full h-full object-cover object-center transform scale-105 hover:scale-100 transition-transform duration-[2s] ease-out">
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Value Proposition Section -->
+    <section id="features" class="py-24 relative z-20 bg-gradient-to-b from-transparent to-white/50">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+            
+            <div class="text-center max-w-3xl mx-auto mb-20 fade-up">
+                <h2 class="text-brand-600 font-bold tracking-widest uppercase text-xs mb-4">Core Philosophy</h2>
+                <h3 class="text-3xl md:text-5xl font-extrabold text-surface-dark mb-6 tracking-tight">系統化的極致款待</h3>
+                <p class="text-slate-500 text-lg">我們將頂級飯店的服務邏輯，轉化為流暢的晨間體驗。每一個細節，皆為您的完美早晨而設計。</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 perspective-container">
+                
+                <!-- Card 1: 尊榮至上 -->
+                <div class="glass-card rounded-[2rem] p-8 group tilt-card cursor-pointer">
+                    <div class="relative h-56 rounded-2xl overflow-hidden mb-8 card-content-3d shadow-sm">
+                        <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=800&q=80" alt="尊榮至上" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/50 to-transparent"></div>
+                        <div class="absolute bottom-5 left-5 bg-white/90 backdrop-blur-md w-12 h-12 rounded-xl flex items-center justify-center text-brand-600 shadow-lg">
+                            <iconify-icon icon="ph:crown-duotone" class="text-3xl"></iconify-icon>
+                        </div>
+                    </div>
+                    <div class="card-content-3d">
+                        <h4 class="text-2xl font-bold text-surface-dark mb-3">尊榮至上</h4>
+                        <p class="text-slate-500 text-sm leading-relaxed mb-6 font-medium">
+                            專屬數位管家提前為您打理一切。從抵達時的專人引導，到入座即奉上的客製化迎賓特調，感受無縫接軌的頂級禮遇。
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Card 2: 極致品味 -->
+                <div class="glass-card rounded-[2rem] p-8 group tilt-card cursor-pointer md:translate-y-8">
+                    <div class="relative h-56 rounded-2xl overflow-hidden mb-8 card-content-3d shadow-sm">
+                        <img src="https://images.unsplash.com/photo-1482049016688-2d3e1b311543?auto=format&fit=crop&w=800&q=80" alt="極致品味" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/50 to-transparent"></div>
+                        <div class="absolute bottom-5 left-5 bg-white/90 backdrop-blur-md w-12 h-12 rounded-xl flex items-center justify-center text-brand-600 shadow-lg">
+                            <iconify-icon icon="ph:magic-wand-duotone" class="text-3xl"></iconify-icon>
+                        </div>
+                    </div>
+                    <div class="card-content-3d">
+                        <h4 class="text-2xl font-bold text-surface-dark mb-3">極致品味</h4>
+                        <p class="text-slate-500 text-sm leading-relaxed mb-6 font-medium">
+                            嚴格甄選全球莊園級單品咖啡豆與在地履歷生鮮。以精密的數據化控溫烹調，確保每一口輕食與咖啡的風味皆達到完美峰值。
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Card 3: 絕對私密 -->
+                <div class="glass-card rounded-[2rem] p-8 group tilt-card cursor-pointer">
+                    <div class="relative h-56 rounded-2xl overflow-hidden mb-8 card-content-3d shadow-sm">
+                        <img src="https://images.unsplash.com/photo-1493857671505-72967e2e2760?auto=format&fit=crop&w=800&q=80" alt="絕對私密" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/50 to-transparent"></div>
+                        <div class="absolute bottom-5 left-5 bg-white/90 backdrop-blur-md w-12 h-12 rounded-xl flex items-center justify-center text-brand-600 shadow-lg">
+                            <iconify-icon icon="ph:lock-key-duotone" class="text-3xl"></iconify-icon>
+                        </div>
+                    </div>
+                    <div class="card-content-3d">
+                        <h4 class="text-2xl font-bold text-surface-dark mb-3">絕對私密</h4>
+                        <p class="text-slate-500 text-sm leading-relaxed mb-6 font-medium">
+                            採用高端會所級距的空間規劃。每個座位區皆享有獨立結界般的聲學阻絕與視覺屏蔽，讓您能專注於會議或獨處時光。
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- App-like Feature Highlights -->
+    <section id="space" class="py-24 relative z-20 overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="bg-white rounded-[3rem] p-10 md:p-20 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] border border-slate-100 flex flex-col lg:flex-row items-center gap-16">
+                <div class="lg:w-1/2 fade-up">
+                    <div class="w-16 h-16 rounded-2xl bg-brand-50 flex items-center justify-center mb-8">
+                        <iconify-icon icon="ph:faders-duotone" class="text-3xl text-brand-500"></iconify-icon>
+                    </div>
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-surface-dark mb-6 tracking-tight">環境參數，隨心掌控</h2>
+                    <p class="text-slate-500 text-lg mb-8 leading-relaxed">
+                        透過專屬 Web App 預訂時，即可預先設定您的座位偏好。從空調溫度、背景音樂流派，到光線明暗，我們在您入座前便已準備就緒。
+                    </p>
+                    <ul class="space-y-4">
+                        <li class="flex items-center text-slate-700 font-semibold">
+                            <iconify-icon icon="ph:check-circle-fill" class="text-brand-500 mr-3 text-xl"></iconify-icon> 智能溫控座位區
+                        </li>
+                        <li class="flex items-center text-slate-700 font-semibold">
+                            <iconify-icon icon="ph:check-circle-fill" class="text-brand-500 mr-3 text-xl"></iconify-icon> 專屬聲學靜音艙選配
+                        </li>
+                        <li class="flex items-center text-slate-700 font-semibold">
+                            <iconify-icon icon="ph:check-circle-fill" class="text-brand-500 mr-3 text-xl"></iconify-icon> 個人化手沖水溫記憶
+                        </li>
+                    </ul>
+                </div>
+                <div class="lg:w-1/2 relative fade-up">
+                    <div class="absolute inset-0 bg-gradient-to-tr from-brand-100 to-blue-50 rounded-[2rem] transform rotate-3 scale-105 -z-10"></div>
+                    <img src="https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&w=800&q=80" alt="App Control Concept" class="rounded-[2rem] shadow-xl object-cover h-[400px] w-full">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA Section -->
+    <section id="book" class="py-32 relative z-20">
+        <div class="max-w-5xl mx-auto px-6 lg:px-8 text-center fade-up">
+            <h2 class="text-4xl md:text-5xl font-extrabold text-surface-dark mb-6 tracking-tight">保留您的晨間專屬席次</h2>
+            <p class="text-slate-500 text-lg mb-10 max-w-2xl mx-auto">
+                AURA 採全預約制，以確保每一位貴賓的服務品質與私密空間。點擊下方按鈕，選擇您的時段，體驗無與倫比的早晨。
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center items-center gap-6">
+                <button class="btn-saas inline-flex items-center justify-center px-10 py-5 text-lg font-bold rounded-full text-white bg-surface-dark shadow-xl hover:shadow-2xl w-full sm:w-auto">
+                    立即預訂 <iconify-icon icon="ph:calendar-plus-duotone" class="ml-2 text-2xl text-brand-400"></iconify-icon>
+                </button>
+                <span class="text-sm font-semibold text-slate-400">目前開放 30 天內預約</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 pt-16 pb-8 relative z-20">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+                <div class="col-span-1 md:col-span-2">
+                    <div class="flex items-center gap-2 mb-6">
+                        <div class="w-8 h-8 rounded-lg bg-surface-dark flex items-center justify-center text-white">
+                            <iconify-icon icon="ph:leaf-bold"></iconify-icon>
+                        </div>
+                        <span class="font-bold text-xl text-surface-dark">AURA <span class="font-normal text-slate-400 text-xs ml-1">晨光私域</span></span>
+                    </div>
+                    <p class="text-slate-500 text-sm leading-relaxed max-w-sm">
+                        重新定義早晨的價值。結合科技預訂與極致工藝，打造專屬於現代菁英的隱密輕食咖啡空間。
+                    </p>
+                </div>
+                <div>
+                    <h5 class="font-bold text-surface-dark mb-4 text-sm tracking-widest uppercase">服務</h5>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-slate-500 hover:text-brand-600 text-sm font-medium transition-colors">菜單與豆單</a></li>
+                        <li><a href="#" class="text-slate-500 hover:text-brand-600 text-sm font-medium transition-colors">空間規格</a></li>
+                        <li><a href="#" class="text-slate-500 hover:text-brand-600 text-sm font-medium transition-colors">黑卡會員計畫</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="font-bold text-surface-dark mb-4 text-sm tracking-widest uppercase">聯絡</h5>
+                    <ul class="space-y-3">
+                        <li class="flex items-center text-slate-500 text-sm font-medium">
+                            <iconify-icon icon="ph:map-pin-duotone" class="mr-2 text-brand-500 text-lg"></iconify-icon>
+                            台北市信義區隱密靜巷 1 號
+                        </li>
+                        <li class="flex items-center text-slate-500 text-sm font-medium">
+                            <iconify-icon icon="ph:envelope-duotone" class="mr-2 text-brand-500 text-lg"></iconify-icon>
+                            concierge@aura-morning.com
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="pt-8 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between">
+                <p class="text-slate-400 text-sm font-medium mb-4 md:mb-0">&copy; 2026 AURA Morning Oasis. All rights reserved.</p>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-slate-400 hover:text-brand-500 transition-colors"><iconify-icon icon="ph:instagram-logo-duotone" class="text-xl"></iconify-icon></a>
+                    <a href="#" class="text-slate-400 hover:text-brand-500 transition-colors"><iconify-icon icon="ph:line-logo-duotone" class="text-xl"></iconify-icon></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            
+            // 1. Navbar Scroll Effect (Glassmorphism)
+            const navbar = document.getElementById('navbar');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 20) {
+                    navbar.classList.add('bg-white/80', 'backdrop-blur-xl', 'border-slate-200/50', 'shadow-sm');
+                    navbar.classList.remove('border-transparent');
+                } else {
+                    navbar.classList.remove('bg-white/80', 'backdrop-blur-xl', 'border-slate-200/50', 'shadow-sm');
+                    navbar.classList.add('border-transparent');
+                }
+            });
+
+            // 2. GSAP Animations
+            gsap.registerPlugin(ScrollTrigger);
+
+            // Hero Entrance
+            gsap.from(".gs-reveal > *", {
+                y: 40,
+                opacity: 0,
+                duration: 1.2,
+                stagger: 0.15,
+                ease: "power3.out",
+                delay: 0.1
+            });
+
+            gsap.from(".gs-reveal-img", {
+                x: 100,
+                opacity: 0,
+                duration: 1.5,
+                ease: "power3.out",
+                delay: 0.3
+            });
+
+            // Fade Up Elements
+            gsap.utils.toArray('.fade-up').forEach(element => {
+                gsap.from(element, {
+                    scrollTrigger: {
+                        trigger: element,
+                        start: "top 85%",
+                    },
+                    y: 40,
+                    opacity: 0,
+                    duration: 1,
+                    ease: "power2.out"
+                });
+            });
+
+            // Stagger Cards
+            gsap.from(".tilt-card", {
+                scrollTrigger: {
+                    trigger: ".perspective-container",
+                    start: "top 80%",
+                },
+                y: 60,
+                opacity: 0,
+                duration: 0.8,
+                stagger: 0.2,
+                ease: "back.out(1.2)"
+            });
+
+            // 3. Anime.js for smooth floating blobs
+            anime({
+                targets: '.floating-blob',
+                translateX: function() { return anime.random(-50, 50) + 'px'; },
+                translateY: function() { return anime.random(-50, 50) + 'px'; },
+                scale: function() { return anime.random(80, 120) / 100; },
+                easing: 'easeInOutSine',
+                duration: 8000,
+                direction: 'alternate',
+                loop: true
+            });
+
+            // 4. Vanilla JS 3D Hover Tilt Effect for Glass Cards
+            const cards = document.querySelectorAll('.tilt-card');
+            
+            cards.forEach(card => {
+                card.addEventListener('mousemove', e => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    
+                    // Gentle tilt limits for SaaS feel
+                    const rotateX = ((y - centerY) / centerY) * -8; 
+                    const rotateY = ((x - centerX) / centerX) * 8;
+                    
+                    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+                });
+
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+                    
+                    // Maintain offset for the middle card
+                    if(card.classList.contains('md:translate-y-8')) {
+                        setTimeout(()=> { card.style.transform = `translateY(2rem)`; }, 300);
+                    }
+                });
+            });
+
+            // 5. Three.js Subtle Ambient Micro-particles
+            const initThreeJS = () => {
+                const container = document.getElementById('canvas-container');
+                const scene = new THREE.Scene();
+                const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+                
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                container.appendChild(renderer.domElement);
+
+                // Create minimal particles
+                const particleCount = 150;
+                const geometry = new THREE.BufferGeometry();
+                const positions = new Float32Array(particleCount * 3);
+
+                for(let i = 0; i < particleCount * 3; i++) {
+                    positions[i] = (Math.random() - 0.5) * 15; // Spread
+                }
+
+                geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+                
+                // Soft green/teal color
+                const material = new THREE.PointsMaterial({
+                    size: 0.04,
+                    color: 0x10b981,
+                    transparent: true,
+                    opacity: 0.2,
+                    blending: THREE.NormalBlending
+                });
+
+                const particles = new THREE.Points(geometry, material);
+                scene.add(particles);
+                camera.position.z = 5;
+
+                // Mouse interaction setup
+                let mouseX = 0;
+                let mouseY = 0;
+                let targetX = 0;
+                let targetY = 0;
+                const windowHalfX = window.innerWidth / 2;
+                const windowHalfY = window.innerHeight / 2;
+
+                document.addEventListener('mousemove', (event) => {
+                    mouseX = (event.clientX - windowHalfX) * 0.0003;
+                    mouseY = (event.clientY - windowHalfY) * 0.0003;
+                });
+
+                // Animation Loop
+                const animate = () => {
+                    requestAnimationFrame(animate);
+                    
+                    targetX = mouseX * 0.5;
+                    targetY = mouseY * 0.5;
+                    
+                    // Base slow rotation
+                    particles.rotation.y += 0.0005;
+                    particles.rotation.x += 0.0002;
+
+                    // Mouse parallax
+                    particles.rotation.y += 0.05 * (targetX - particles.rotation.y);
+                    particles.rotation.x += 0.05 * (targetY - particles.rotation.x);
+
+                    // Float upwards effect
+                    const positions = particles.geometry.attributes.position.array;
+                    for(let i = 1; i < particleCount * 3; i += 3) {
+                        positions[i] += 0.002;
+                        if(positions[i] > 7.5) {
+                            positions[i] = -7.5; // Reset to bottom
+                        }
+                    }
+                    particles.geometry.attributes.position.needsUpdate = true;
+
+                    renderer.render(scene, camera);
+                };
+                
+                animate();
+
+                // Handle Resize
+                window.addEventListener('resize', () => {
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                });
+            };
+
+            // Init safely
+            try {
+                initThreeJS();
+            } catch (e) {
+                console.log("Three.js initialization failed.", e);
+            }
+        });
+    </script>
+</body>
+</html>
